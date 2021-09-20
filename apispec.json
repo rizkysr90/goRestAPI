@@ -1,0 +1,184 @@
+{
+  "openapi":"3.0.3" ,
+  "info": {
+    "title" : "Library Management System Restful API",
+    "description" : "Open API for library management system",
+    "version" : "1",
+    "contact" : {
+      "name" : "Rizki Susilo Ramadhan",
+      "email" : "rizkysr90@gmail.com"
+    }
+  },
+  "servers" : [{
+    "description" : "Library restful API",
+    "url" : "http://localhost:8000"
+  }],
+  "paths" : {
+    "/register" : {
+      "post" : {
+        "summary" : "Create new Members",
+        "description" : "Create new members",
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded:" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "email" : {
+                    "type" : "string"
+                  },
+                  "password" : {
+                    "type" : "string"
+                  },
+                  "address" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success Create New Member",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+        
+      }
+    },
+    "/login" : {
+      "post" : {
+        "summary" : "Login account",
+        "description" : "Login account",
+        "requestBody" : {
+          "content" : {
+              "application/x-www-form-urlencoded:" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "email" : {
+                      "type" : "string"
+                    },
+                    "password" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Success Login",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member" :  {
+      "get" : {
+        "summary" : "Get member information",
+        "description" : "Get user name member",
+        "responses" : {
+          "200" : {
+            "description" : "succes get member name",
+            "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "object",
+                    "properties": {
+                      "name" : {
+                        "type" : "string",
+                        "description" : "Member name"
+                      }
+                    }
+                  }
+                }   
+            }
+           
+          }
+        }
+      }
+    },
+    "/member/books" : {
+      "get" : {
+        "summary" : "Search books information",
+        "description" : "get books information",
+        "parameters" : [
+          {
+              "in" : "query",
+              "name" : "name",
+              "schema" : {
+                "type" : "string"
+              },
+              "description" : "The name of books"
+          },
+          {
+            "in" : "query",
+            "name" : "author",
+            "schema" : {
+              "type" : "string"
+            },
+            "description" : "the author of books"
+          },
+          {
+            "in" : "query",
+            "name" : "year",
+            "schema" : {
+              "type" : "integer"
+            },
+            "description" : "the years of books released"
+          }
+          
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "succes get books",
+            "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "object",
+                    "properties": {
+                      "name" : {
+                        "type" : "string",
+                        "description" : "Book name"
+                      },
+                      "author" : {
+                        "type" : "string",
+                        "description" : "author of the book"
+                      },
+                      "year" : {
+                        "type" : "integer",
+                        "description" : "year of released book"
+                      },
+                      "stock" : {
+                        "type" : "integer",
+                        "description" : "stock of copied book"
+                      }
+                    }
+                  }
+                }   
+            }
+           
+          }
+        }
+      }
+    }
+  }
+}
