@@ -1,6 +1,7 @@
 package config
 
 import (
+	book "project/model/Books"
 	"project/model/users"
 
 	"gorm.io/driver/mysql"
@@ -22,4 +23,5 @@ func InitDB() {
 
 func InitMigrate() {
 	DB.AutoMigrate(&users.User{})
+	DB.AutoMigrate(&book.Book{})
 }
