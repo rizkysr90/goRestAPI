@@ -3,4 +3,8 @@ Puisi - Saya Cinta Indonesia
 Indonesia sangat indah (from github)
 Indonesia luar biasa (from vscode)
 Indonesia memang yang terbaik
+<<<<<<< HEAD
 Indonesia tanah air beta (from feature B)
+=======
+Indoesia tanah air beta
+>>>>>>> FeatureA
