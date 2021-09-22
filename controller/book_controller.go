@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"project/config"
 	book "project/model/Books"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -35,9 +36,12 @@ func AddBookController(c echo.Context) error {
 	}
 
 	var book book.Book
-	book.Authors = data.VolumeInfo.Authors[0]
+	book.Authors = strings.Join(data.VolumeInfo.Authors, ",")
 	book.Title = data.VolumeInfo.Title
 	book.Cover = data.VolumeInfo.Cover.Medium
+	book.Categories = strings.Join(data.VolumeInfo.Categories, ",")
+	book.PublishedDate = data.VolumeInfo.PublishedDate
+	book.CopiesOwned = 3
 	defer resp.Body.Close()
 
 	result := config.DB.Create(&book)
@@ -47,11 +51,13 @@ func AddBookController(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":   "succes add book",
-		"id":        book.Id,
-		"title":     book.Title,
-		"author":    book.Authors,
-		"imageLink": book.Cover,
+		"message":       "Succes add book",
+		"id":            book.Id,
+		"title":         book.Title,
+		"author":        book.Authors,
+		"categories":    book.Categories,
+		"publishedDate": book.PublishedDate,
+		"imageLink":     book.Cover,
 	})
 
 }
