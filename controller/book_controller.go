@@ -14,7 +14,7 @@ import (
 func AddBookController(c echo.Context) error {
 	//Build the request
 	apiKey := "?key=" + "AIzaSyBkKjJlE2J3DvjifdHTWXr4JSLS6SRlcic"
-	id := "MOUREAAAQBAJ"
+	id := "pgjmDAAAQBAJ"
 	request := "https://www.googleapis.com/books/v1/volumes/" + id + apiKey
 	req, err := http.NewRequest("GET", request, nil)
 	if err != nil {
@@ -58,6 +58,33 @@ func AddBookController(c echo.Context) error {
 		"categories":    book.Categories,
 		"publishedDate": book.PublishedDate,
 		"imageLink":     book.Cover,
+	})
+
+}
+
+func BookSearchByTitle(c echo.Context) error {
+	q := c.QueryParam("title")
+	target := "%" + q + "%"
+	var book book.Book
+	err := config.DB.Where("title LIKE ?", target).Find(&book).Error
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": "Error while search data",
+		})
+	}
+	if book.Title == "" {
+		return c.JSON(http.StatusAccepted, map[string]interface{}{
+			"message": "Data buku tidak ditemukan",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":    "Buku ditemukan",
+		"id":         book.Id,
+		"title":      book.Title,
+		"authors":    book.Authors,
+		"categories": book.Categories,
+		"imageLinks": book.Cover,
 	})
 
 }

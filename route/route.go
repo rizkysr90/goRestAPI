@@ -12,5 +12,6 @@ func New() *echo.Echo {
 	e.POST("/register", controller.RegisterController)
 	e.POST("/login", controller.LoginController)
 	e.GET("/addBooks", controller.AddBookController)
+	e.GET("/books/search", controller.BookSearchByTitle)
 	return e
 }
