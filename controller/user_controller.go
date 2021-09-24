@@ -50,6 +50,11 @@ func LoginController(c echo.Context) error {
 			"message": "Failed to get the data",
 		})
 	}
+	if user.Name == "" {
+		return c.JSON(http.StatusForbidden, map[string]interface{}{
+			"message": "user data tidak ditemukan,periksa kembali email / password anda",
+		})
+	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success",
 		"name":    user.Name,
