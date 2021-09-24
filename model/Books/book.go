@@ -1,14 +1,16 @@
-package book
+package books
 
-import "gorm.io/gorm"
+import (
+	"project/model/loan"
+)
 
 type Book struct {
-	gorm.Model
 	Id            int    `gorm:"primaryKey" json:"id"`
 	Title         string `json:"title"`
 	Authors       string `json:"authors"`
 	Categories    string `json:"categories"`
 	PublishedDate string `json:"publishedDate"`
 	Cover         string `json:"cover"`
-	CopiesOwned   int
+	CopiesOwned   int    `json:"copiesOwned"`
+	Loan          []loan.Loan
 }

@@ -1,7 +1,5 @@
-package book
+package books
 
-type Info struct {
-}
 type GetBook struct {
 	VolumeInfo struct {
 		Title         string   `json:"title"`

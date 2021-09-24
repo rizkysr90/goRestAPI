@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"project/config"
-	book "project/model/Books"
+	books "project/model/Books"
+	"project/model/loan"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -28,14 +30,14 @@ func AddBookController(c echo.Context) error {
 	if err != nil {
 		fmt.Println("error in send req: ", err)
 	}
-	var data book.GetBook
+	var data books.GetBook
 
 	// Use json.Decode for reading streams of JSON data
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		fmt.Println(err)
 	}
 
-	var book book.Book
+	var book books.Book
 	book.Authors = strings.Join(data.VolumeInfo.Authors, ",")
 	book.Title = data.VolumeInfo.Title
 	book.Cover = data.VolumeInfo.Cover.Medium
@@ -62,10 +64,10 @@ func AddBookController(c echo.Context) error {
 
 }
 
-func BookSearchByTitle(c echo.Context) error {
+func SearchBookByTitle(c echo.Context) error {
 	q := c.QueryParam("title")
 	target := "%" + q + "%"
-	var book book.Book
+	var book books.Book
 	err := config.DB.Where("title LIKE ?", target).Find(&book).Error
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
@@ -79,12 +81,49 @@ func BookSearchByTitle(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":    "Buku ditemukan",
-		"id":         book.Id,
-		"title":      book.Title,
-		"authors":    book.Authors,
-		"categories": book.Categories,
-		"imageLinks": book.Cover,
+		"message":     "Buku ditemukan",
+		"id":          book.Id,
+		"title":       book.Title,
+		"authors":     book.Authors,
+		"categories":  book.Categories,
+		"imageLinks":  book.Cover,
+		"copiesOwned": book.CopiesOwned,
 	})
+
+}
+func LoanBook(c echo.Context) error {
+	//get data in database if exist
+	var book books.Book
+	err := config.DB.Where("id = ?", c.Param("id")).Find(&book).Error
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "record not found",
+		})
+	}
+
+	//Validate input
+	var data loan.Loan
+	data.UserID, _ = strconv.Atoi(c.Param("user_id"))
+	data.BookID, _ = strconv.Atoi(c.Param("id"))
+
+	if book.CopiesOwned == 0 {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "Book is not ready,stok = 0",
+		})
+	} else {
+		result := config.DB.Create(&data)
+		if result.Error != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"message": "Failed to reserve book",
+			})
+		}
+		book.CopiesOwned = book.CopiesOwned - 1
+		fmt.Println(book.CopiesOwned)
+		config.DB.Save(&book)
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "Succes to reserve book",
+			"data":    data,
+		})
+	}
 
 }
