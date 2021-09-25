@@ -1,11 +1,15 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"project/config"
+	"project/middlewares"
+	"project/model/response"
 	"project/model/users"
 
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 func RegisterController(c echo.Context) error {
@@ -39,25 +43,49 @@ func RegisterController(c echo.Context) error {
 }
 
 func LoginController(c echo.Context) error {
-	var userLogin users.UserLogin
-	var user users.User
+	userLogin := users.UserLogin{}
 	c.Bind(&userLogin)
 
-	err := config.DB.Where("email = ? AND password = ?", userLogin.Email, userLogin.Password).Find(&user).Error
+	user := users.User{}
 
+	result := config.DB.First(&user, "email = ? AND password = ?", userLogin.Email, userLogin.Password)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return c.JSON(http.StatusForbidden, response.BaseResponse{
+				Code:    http.StatusForbidden,
+				Message: "User tidak ditemukan atau password tidak sesuai",
+				Data:    nil,
+			})
+		} else {
+			return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Ada keselahan di server",
+				Data:    nil,
+			})
+		}
+	}
+	token, err := middlewares.GenerateTokenJWT(user.Id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "Failed to get the data",
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Ada keselahan di server",
+			Data:    nil,
 		})
 	}
-	if user.Name == "" {
-		return c.JSON(http.StatusForbidden, map[string]interface{}{
-			"message": "user data tidak ditemukan,periksa kembali email / password anda",
-		})
+	userResponse := users.UserResponse{
+		Id:        user.Id,
+		Name:      user.Name,
+		Email:     user.Email,
+		Address:   user.Address,
+		Token:     token,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success",
-		"name":    user.Name,
+	return c.JSON(http.StatusOK, response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Berhasil login",
+		Data:    userResponse,
 	})
 
 }
