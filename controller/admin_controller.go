@@ -5,31 +5,31 @@ import (
 	"net/http"
 	"project/config"
 	"project/middlewares"
+	admins "project/model/admin"
 	"project/model/response"
-	"project/model/users"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
-func RegisterUserController(c echo.Context) error {
-	var userRegister users.UserRegister
+func RegisterAdminController(c echo.Context) error {
+	var adminRegister admins.AdminRegister
 
-	c.Bind(&userRegister)
+	c.Bind(&adminRegister)
 
-	if userRegister.Name == "" {
+	if adminRegister.Name == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message": "Nama tidak boleh kosong!",
 		})
 	}
 
-	var UserDB users.User
-	UserDB.Name = userRegister.Name
-	UserDB.Email = userRegister.Email
-	UserDB.Password = userRegister.Password
-	UserDB.Address = userRegister.Address
+	var AdminDB admins.Admin
+	AdminDB.Name = adminRegister.Name
+	AdminDB.Email = adminRegister.Email
+	AdminDB.Address = adminRegister.Address
+	AdminDB.Password = adminRegister.Address
 
-	result := config.DB.Create(&UserDB)
+	result := config.DB.Create(&AdminDB)
 	if result.Error != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": "Failed to create the data",
@@ -37,18 +37,18 @@ func RegisterUserController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "succes create user",
-		"id":      UserDB.Id,
-		"name":    UserDB.Name,
+		"id":      AdminDB.Id,
+		"name":    AdminDB.Name,
 	})
 }
 
-func LoginUserController(c echo.Context) error {
-	userLogin := users.UserLogin{}
-	c.Bind(&userLogin)
+func LoginAdminController(c echo.Context) error {
+	adminLogin := admins.AdminLogin{}
+	c.Bind(&adminLogin)
 
-	user := users.User{}
+	admin := admins.Admin{}
 
-	result := config.DB.First(&user, "email = ? AND password = ?", userLogin.Email, userLogin.Password)
+	result := config.DB.First(&admin, "email = ? AND password = ?", adminLogin.Email, adminLogin.Password)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -65,7 +65,7 @@ func LoginUserController(c echo.Context) error {
 			})
 		}
 	}
-	token, err := middlewares.GenerateTokenJWTUser(user.Id)
+	token, err := middlewares.GenerateTokenJWTAdmin(admin.Id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
 			Code:    http.StatusInternalServerError,
@@ -73,19 +73,20 @@ func LoginUserController(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-	userResponse := users.UserResponse{
-		Id:        user.Id,
-		Name:      user.Name,
-		Email:     user.Email,
-		Address:   user.Address,
+	adminResponse := admins.AdminResponse{
+		Id:        admin.Id,
+		Name:      admin.Name,
+		Email:     admin.Email,
+		Address:   admin.Address,
 		Token:     token,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+		CreatedAt: admin.CreatedAt,
+		UpdatedAt: admin.UpdatedAt,
 	}
+
 	return c.JSON(http.StatusOK, response.BaseResponse{
 		Code:    http.StatusOK,
 		Message: "Berhasil login",
-		Data:    userResponse,
+		Data:    adminResponse,
 	})
 
 }

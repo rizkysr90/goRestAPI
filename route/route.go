@@ -11,13 +11,16 @@ import (
 
 func New() *echo.Echo {
 	e := echo.New()
-	jwt := middleware.JWT([]byte(constants.JWT_SECRET))
-	e.POST("user/register", controller.RegisterController)
-	e.POST("user/login", controller.LoginController)
-	e.GET("/addBooks", controller.AddBookController)
-	e.GET("/search", controller.SearchBookByTitle, jwt)
+	jwtUser := middleware.JWT([]byte(constants.JWT_SECRET_USER))
+	jwtAdmin := middleware.JWT([]byte(constants.JWT_SECRET_ADMIN))
+	e.POST("user/register", controller.RegisterUserController)
+	e.POST("user/login", controller.LoginUserController)
+	e.POST("admin/register", controller.RegisterAdminController)
+	e.POST("admin/login", controller.LoginAdminController)
+	e.GET("/addBooks", controller.AddBookController, jwtAdmin)
+	e.GET("/search", controller.SearchBookByTitle, jwtUser)
 	m.LogMiddleware(e)
 
-	e.POST("/:user_id/books/:id", controller.LoanBook)
+	e.POST("/loan", controller.LoanBook, jwtUser)
 	return e
 }

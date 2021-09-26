@@ -2,6 +2,7 @@ package config
 
 import (
 	books "project/model/Books"
+	admins "project/model/admin"
 	"project/model/loan"
 	"project/model/users"
 
@@ -26,4 +27,5 @@ func InitMigrate() {
 	DB.AutoMigrate(&users.User{})
 	DB.AutoMigrate(&books.Book{})
 	DB.AutoMigrate(&loan.Loan{})
+	DB.AutoMigrate(&admins.Admin{})
 }

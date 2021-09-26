@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"project/config"
-	books "project/model/Books"
+	books "project/model/books"
 	"project/model/loan"
 	"strconv"
 	"strings"
@@ -15,12 +15,14 @@ import (
 
 func AddBookController(c echo.Context) error {
 	//Build the request
+	bookID := c.FormValue("bookId")
+	fmt.Println(bookID)
 	apiKey := "?key=" + "AIzaSyBkKjJlE2J3DvjifdHTWXr4JSLS6SRlcic"
-	id := "pgjmDAAAQBAJ"
-	request := "https://www.googleapis.com/books/v1/volumes/" + id + apiKey
+	request := "https://www.googleapis.com/books/v1/volumes/" + bookID + apiKey
+	fmt.Println(request)
 	req, err := http.NewRequest("GET", request, nil)
 	if err != nil {
-		fmt.Println("Error is req: ", err)
+		fmt.Println("Error is : ", err)
 	}
 	// create a Client
 	client := &http.Client{}
@@ -43,7 +45,7 @@ func AddBookController(c echo.Context) error {
 	book.Cover = data.VolumeInfo.Cover.Medium
 	book.Categories = strings.Join(data.VolumeInfo.Categories, ",")
 	book.PublishedDate = data.VolumeInfo.PublishedDate
-	book.CopiesOwned = 3
+	book.CopiesOwned, _ = strconv.Atoi(c.FormValue("qty"))
 	defer resp.Body.Close()
 
 	result := config.DB.Create(&book)
@@ -53,13 +55,8 @@ func AddBookController(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":       "Succes add book",
-		"id":            book.Id,
-		"title":         book.Title,
-		"author":        book.Authors,
-		"categories":    book.Categories,
-		"publishedDate": book.PublishedDate,
-		"imageLink":     book.Cover,
+		"message": "Succes add book",
+		"data":    book,
 	})
 
 }

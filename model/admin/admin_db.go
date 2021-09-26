@@ -1,4 +1,4 @@
-package loan
+package admins
 
 import (
 	"time"
@@ -6,12 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type Loan struct {
-	gorm.Model
+type Admin struct {
 	Id        int            `gorm:"primaryKey" json:"id"`
-	UserID    int            `sql:"index"`
-	BookID    int            `sql:"index"`
-	Status    string         `json:"status"`
+	Name      string         `json:"name"`
+	Email     string         `json:"email" gorm:"unique"`
+	Password  string         `json:"password"`
+	Address   string         `json:"address"`
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deletedAt"`
