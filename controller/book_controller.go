@@ -14,7 +14,7 @@ import (
 )
 
 func AddBookController(c echo.Context) error {
-	//Build the request
+	//make request from google book api
 	bookID := c.FormValue("bookId")
 	fmt.Println(bookID)
 	apiKey := "?key=" + "AIzaSyBkKjJlE2J3DvjifdHTWXr4JSLS6SRlcic"
