@@ -8,12 +8,12 @@ import (
 )
 
 type User struct {
-	Id        int    `gorm:"primaryKey" json:"id"`
-	Name      string `json:"name"`
-	Email     string `json:"email" gorm:"unique"`
-	Password  string `json:"password"`
-	Address   string `json:"address"`
-	Loan      []loan.Loan
+	Id        int            `gorm:"primaryKey" json:"id"`
+	Name      string         `json:"name"`
+	Email     string         `json:"email" gorm:"unique"`
+	Password  string         `json:"password"`
+	Address   string         `json:"address"`
+	Loan      []loan.Loan    `gorm:"foreignKey:UserID"`
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deletedAt"`

@@ -2,8 +2,10 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"project/config"
+	"project/helper"
 	"project/middlewares"
 	"project/model/response"
 	"project/model/users"
@@ -26,7 +28,7 @@ func RegisterUserController(c echo.Context) error {
 	var UserDB users.User
 	UserDB.Name = userRegister.Name
 	UserDB.Email = userRegister.Email
-	UserDB.Password = userRegister.Password
+	UserDB.Password, _ = helper.Hash(userRegister.Password)
 	UserDB.Address = userRegister.Address
 
 	result := config.DB.Create(&UserDB)
@@ -49,7 +51,8 @@ func LoginUserController(c echo.Context) error {
 	user := users.User{}
 
 	result := config.DB.First(&user, "email = ? AND password = ?", userLogin.Email, userLogin.Password)
-
+	fmt.Println(userLogin.Email)
+	fmt.Println(userLogin.Password)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return c.JSON(http.StatusForbidden, response.BaseResponse{

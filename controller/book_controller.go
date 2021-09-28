@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"project/config"
-	books "project/model/books"
+	books "project/model/Books"
 	"project/model/loan"
 	"strconv"
 	"strings"
@@ -91,7 +91,7 @@ func SearchBookByTitle(c echo.Context) error {
 func LoanBook(c echo.Context) error {
 	//get data in database if exist
 	var book books.Book
-	err := config.DB.Where("id = ?", c.Param("id")).Find(&book).Error
+	err := config.DB.Where("id = ?", c.Param("book_id")).Find(&book).Error
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "record not found",
@@ -101,7 +101,8 @@ func LoanBook(c echo.Context) error {
 	//Validate input
 	var data loan.Loan
 	data.UserID, _ = strconv.Atoi(c.Param("user_id"))
-	data.BookID, _ = strconv.Atoi(c.Param("id"))
+	data.BookID, _ = strconv.Atoi(c.Param("book_id"))
+	data.Status = 0
 
 	if book.CopiesOwned == 0 {
 		return c.JSON(http.StatusOK, map[string]interface{}{
@@ -115,7 +116,7 @@ func LoanBook(c echo.Context) error {
 			})
 		}
 		book.CopiesOwned = book.CopiesOwned - 1
-		fmt.Println(book.CopiesOwned)
+		// fmt.Println(book.CopiesOwned)
 		config.DB.Save(&book)
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"message": "Succes to reserve book",
