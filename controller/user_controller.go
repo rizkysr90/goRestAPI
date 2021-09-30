@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"project/config"
 	"project/helper"
@@ -37,11 +36,12 @@ func RegisterUserController(c echo.Context) error {
 			"message": "Failed to create the data",
 		})
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "succes create user",
-		"id":      UserDB.Id,
-		"name":    UserDB.Name,
+	return c.JSON(http.StatusOK, response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Berhasil daftar",
+		Data:    nil,
 	})
+
 }
 
 func LoginUserController(c echo.Context) error {
@@ -49,15 +49,12 @@ func LoginUserController(c echo.Context) error {
 	c.Bind(&userLogin)
 
 	user := users.User{}
-
-	result := config.DB.First(&user, "email = ? AND password = ?", userLogin.Email, userLogin.Password)
-	fmt.Println(userLogin.Email)
-	fmt.Println(userLogin.Password)
+	result := config.DB.First(&user, "email = ?", userLogin.Email)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return c.JSON(http.StatusForbidden, response.BaseResponse{
 				Code:    http.StatusForbidden,
-				Message: "User tidak ditemukan atau password tidak sesuai",
+				Message: "Email belum terdaftar",
 				Data:    nil,
 			})
 		} else {
@@ -67,6 +64,13 @@ func LoginUserController(c echo.Context) error {
 				Data:    nil,
 			})
 		}
+	}
+	if !helper.CheckPasswordHash(userLogin.Password, user.Password) {
+		return c.JSON(http.StatusForbidden, response.BaseResponse{
+			Code:    http.StatusForbidden,
+			Message: "Password tidak sesuai",
+			Data:    nil,
+		})
 	}
 	token, err := middlewares.GenerateTokenJWTUser(user.Id)
 	if err != nil {

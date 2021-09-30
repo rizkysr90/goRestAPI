@@ -7,6 +7,8 @@ import (
 	"project/config"
 	books "project/model/Books"
 	"project/model/loan"
+	"project/model/response"
+	"project/model/users"
 	"strconv"
 	"strings"
 
@@ -77,31 +79,39 @@ func SearchBookByTitle(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":     "Buku ditemukan",
-		"id":          book.Id,
-		"title":       book.Title,
-		"authors":     book.Authors,
-		"categories":  book.Categories,
-		"imageLinks":  book.Cover,
-		"copiesOwned": book.CopiesOwned,
+	return c.JSON(http.StatusOK, response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Data buku ditemukan",
+		Data:    book,
 	})
 
 }
 func LoanBook(c echo.Context) error {
 	//get data in database if exist
+	var reservation loan.UserReservation
+	c.Bind(&reservation)
 	var book books.Book
-	err := config.DB.Where("id = ?", c.Param("book_id")).Find(&book).Error
+	var user users.User
+	err := config.DB.Where("id = ?", reservation.BookId).Find(&book).Error
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "record not found",
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusForbidden,
+			Message: "Buku tidak tersedia",
+			Data:    nil,
 		})
 	}
-
+	err = config.DB.Where("id = ?", reservation.UserId).Find(&user).Error
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusForbidden,
+			Message: "Akun tidak terdaftar",
+			Data:    nil,
+		})
+	}
 	//Validate input
 	var data loan.Loan
-	data.UserID, _ = strconv.Atoi(c.Param("user_id"))
-	data.BookID, _ = strconv.Atoi(c.Param("book_id"))
+	data.UserID = reservation.UserId
+	data.BookID = reservation.BookId
 	data.Status = 0
 
 	if book.CopiesOwned == 0 {
@@ -115,12 +125,25 @@ func LoanBook(c echo.Context) error {
 				"message": "Failed to reserve book",
 			})
 		}
-		book.CopiesOwned = book.CopiesOwned - 1
-		// fmt.Println(book.CopiesOwned)
-		config.DB.Save(&book)
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message": "Succes to reserve book",
-			"data":    data,
+
+		config.DB.Save(&data)
+		config.DB.Joins("JOIN users ON users.id = loans.user_id").Joins("JOIN books ON books.id = loans.book_id").Find(&data)
+		UserResponse := loan.UserReservationResponse{
+			Id:    user.Id,
+			Name:  user.Name,
+			Email: user.Email,
+		}
+		resp := loan.ReservationResponse{
+			Id:          data.Id,
+			StatusOrder: data.Status,
+			User:        UserResponse,
+			Book:        book,
+		}
+
+		return c.JSON(http.StatusOK, response.BaseResponse{
+			Code:    http.StatusOK,
+			Message: "Buku berhasil di pesan,tunggu konfirmasi pihak perpustakaan",
+			Data:    resp,
 		})
 	}
 

@@ -13,14 +13,18 @@ func New() *echo.Echo {
 	e := echo.New()
 	jwtUser := middleware.JWT([]byte(constants.JWT_SECRET_USER))
 	jwtAdmin := middleware.JWT([]byte(constants.JWT_SECRET_ADMIN))
+
 	e.POST("/user/register", controller.RegisterUserController)
-	e.POST("/user/login", controller.LoginUserController)
+	e.GET("/user/login", controller.LoginUserController)
 	e.POST("/admin/register", controller.RegisterAdminController)
-	e.POST("/admin/login", controller.LoginAdminController)
+	e.GET("/admin/login", controller.LoginAdminController)
 	e.GET("/addBooks", controller.AddBookController, jwtAdmin)
 	e.GET("/search", controller.SearchBookByTitle, jwtUser)
+	// e.GET("/admin/reservation", controller.GetReservation, jwtAdmin)
+
+	e.PUT("/admin/reservation", controller.ReservationProcces, jwtAdmin)
 	m.LogMiddleware(e)
 
-	e.POST("/reservation/:user_id/:book_id", controller.LoanBook, jwtUser)
+	e.POST("/reservation", controller.LoanBook, jwtUser)
 	return e
 }
