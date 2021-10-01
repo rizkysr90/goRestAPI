@@ -1,9 +1,10 @@
 package config
 
 import (
-	books "project/model/Books"
 	admins "project/model/admin"
+	books "project/model/books"
 	"project/model/loan"
+	"project/model/status"
 	"project/model/users"
 
 	"gorm.io/driver/mysql"
@@ -28,4 +29,5 @@ func InitMigrate() {
 	DB.AutoMigrate(&books.Book{})
 	DB.AutoMigrate(&loan.Loan{})
 	DB.AutoMigrate(&admins.Admin{})
+	DB.AutoMigrate(&status.Code{})
 }

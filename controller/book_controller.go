@@ -2,14 +2,13 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"project/config"
-	books "project/model/Books"
+	"project/model/books"
 	"project/model/loan"
 	"project/model/response"
+	"project/model/status"
 	"project/model/users"
-	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -17,14 +16,17 @@ import (
 
 func AddBookController(c echo.Context) error {
 	//make request from google book api
-	bookID := c.FormValue("bookId")
-	fmt.Println(bookID)
+	var call books.Calling
+	c.Bind(&call)
 	apiKey := "?key=" + "AIzaSyBkKjJlE2J3DvjifdHTWXr4JSLS6SRlcic"
-	request := "https://www.googleapis.com/books/v1/volumes/" + bookID + apiKey
-	fmt.Println(request)
+	request := "https://www.googleapis.com/books/v1/volumes/" + call.VolumeUnique + apiKey
 	req, err := http.NewRequest("GET", request, nil)
 	if err != nil {
-		fmt.Println("Error is : ", err)
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Oops,Something wrong",
+			Data:    nil,
+		})
 	}
 	// create a Client
 	client := &http.Client{}
@@ -32,13 +34,21 @@ func AddBookController(c echo.Context) error {
 	// Do sends an HTTP request and
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("error in send req: ", err)
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Oops,Something wrong",
+			Data:    nil,
+		})
 	}
 	var data books.GetBook
 
 	// Use json.Decode for reading streams of JSON data
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Oops,Something wrong",
+			Data:    nil,
+		})
 	}
 
 	var book books.Book
@@ -47,18 +57,21 @@ func AddBookController(c echo.Context) error {
 	book.Cover = data.VolumeInfo.Cover.Medium
 	book.Categories = strings.Join(data.VolumeInfo.Categories, ",")
 	book.PublishedDate = data.VolumeInfo.PublishedDate
-	book.CopiesOwned, _ = strconv.Atoi(c.FormValue("qty"))
+	book.CopiesOwned = call.Qty
 	defer resp.Body.Close()
 
 	result := config.DB.Create(&book)
 	if result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "Failed to create the data",
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Buku sudah tersedia sebelumnya",
+			Data:    nil,
 		})
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Succes add book",
-		"data":    book,
+	return c.JSON(http.StatusOK, response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Buku berhasil ditambahkan",
+		Data:    book,
 	})
 
 }
@@ -87,64 +100,67 @@ func SearchBookByTitle(c echo.Context) error {
 
 }
 func LoanBook(c echo.Context) error {
-	//get data in database if exist
 	var reservation loan.UserReservation
-	c.Bind(&reservation)
+	var data loan.Loan
 	var book books.Book
 	var user users.User
+	var code status.Code
+	c.Bind(&reservation)
 	err := config.DB.Where("id = ?", reservation.BookId).Find(&book).Error
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, response.BaseResponse{
-			Code:    http.StatusForbidden,
-			Message: "Buku tidak tersedia",
+			Code:    http.StatusBadRequest,
+			Message: "Bad Request - Buku tidak tersedia",
 			Data:    nil,
 		})
 	}
-	err = config.DB.Where("id = ?", reservation.UserId).Find(&user).Error
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, response.BaseResponse{
-			Code:    http.StatusForbidden,
-			Message: "Akun tidak terdaftar",
-			Data:    nil,
-		})
-	}
-	//Validate input
-	var data loan.Loan
-	data.UserID = reservation.UserId
 	data.BookID = reservation.BookId
-	data.Status = 0
+	// // err = config.DB.Where("id = ?", reservation.UserId).Find(&user).Error
+	// // if err != nil {
+	// // 	return c.JSON(http.StatusBadRequest, response.BaseResponse{
+	// // 		Code:    http.StatusBadRequest,
+	// // 		Message: "Bad Request - Akun belum terdaftar",
+	// // 		Data:    nil,
+	// // 	})
+	// // }
+	data.UserID = reservation.UserId
+	data.CodeID = 1
+	// err = config.DB.Where("id = ?", data.CodeID).Find(&status).Error
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+	// 		Code:    http.StatusInternalServerError,
+	// 		Message: "Internal Server Error",
+	// 		Data:    nil,
+	// 	})
+	// }
 
-	if book.CopiesOwned == 0 {
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message": "Book is not ready,stok = 0",
-		})
-	} else {
-		result := config.DB.Create(&data)
-		if result.Error != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"message": "Failed to reserve book",
-			})
-		}
-
-		config.DB.Save(&data)
-		config.DB.Joins("JOIN users ON users.id = loans.user_id").Joins("JOIN books ON books.id = loans.book_id").Find(&data)
-		UserResponse := loan.UserReservationResponse{
-			Id:    user.Id,
-			Name:  user.Name,
-			Email: user.Email,
-		}
-		resp := loan.ReservationResponse{
-			Id:          data.Id,
-			StatusOrder: data.Status,
-			User:        UserResponse,
-			Book:        book,
-		}
-
-		return c.JSON(http.StatusOK, response.BaseResponse{
-			Code:    http.StatusOK,
-			Message: "Buku berhasil di pesan,tunggu konfirmasi pihak perpustakaan",
-			Data:    resp,
+	result := config.DB.Create(&data)
+	if result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": "Failed to reserve book",
 		})
 	}
+	config.DB.Save(&data)
+	config.DB.Preload("Book").Find(&book)
+	config.DB.Preload("User").Find(&user)
+	config.DB.Preload("Code").Find(&code)
+	// config.DB.Joins("JOIN books ON books.id = loans.book_id").Joins("JOIN users ON users.id = loans.user_id").Find(&data)
+	UserResponse := loan.UserReservationResponse{
+		Id:    user.Id,
+		Name:  user.Name,
+		Email: user.Email,
+	}
+	resp := loan.ReservationResponse{
+		Id:   data.Id,
+		Code: code,
+		User: UserResponse,
+		Book: book,
+	}
+
+	return c.JSON(http.StatusOK, response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "OK - Pemesanan berhasil",
+		Data:    resp,
+	})
 
 }

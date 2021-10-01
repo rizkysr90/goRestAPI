@@ -18,10 +18,10 @@ func New() *echo.Echo {
 	e.GET("/user/login", controller.LoginUserController)
 	e.POST("/admin/register", controller.RegisterAdminController)
 	e.GET("/admin/login", controller.LoginAdminController)
-	e.GET("/addBooks", controller.AddBookController, jwtAdmin)
+	e.POST("/addBooks", controller.AddBookController, jwtAdmin)
 	e.GET("/search", controller.SearchBookByTitle, jwtUser)
 	// e.GET("/admin/reservation", controller.GetReservation, jwtAdmin)
-
+	e.POST("/admin/status", controller.AddStatusReservationCode)
 	e.PUT("/admin/reservation", controller.ReservationProcces, jwtAdmin)
 	m.LogMiddleware(e)
 

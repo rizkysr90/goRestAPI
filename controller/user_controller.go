@@ -19,8 +19,24 @@ func RegisterUserController(c echo.Context) error {
 	c.Bind(&userRegister)
 
 	if userRegister.Name == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "Nama tidak boleh kosong!",
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Bad Request - Nama wajib diisi saat pendaftaran",
+			Data:    nil,
+		})
+	}
+	if userRegister.Email == "" {
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Bad Request - Email wajib diisi saat pendaftaran",
+			Data:    nil,
+		})
+	}
+	if userRegister.Password == "" {
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Bad Request - Password wajib diisi saat pendaftaran",
+			Data:    nil,
 		})
 	}
 
@@ -32,13 +48,15 @@ func RegisterUserController(c echo.Context) error {
 
 	result := config.DB.Create(&UserDB)
 	if result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "Failed to create the data",
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Bad Request - Email sudah digunakan",
+			Data:    nil,
 		})
 	}
 	return c.JSON(http.StatusOK, response.BaseResponse{
 		Code:    http.StatusOK,
-		Message: "Berhasil daftar",
+		Message: "OK- Akun Berhasil daftar",
 		Data:    nil,
 	})
 
@@ -91,7 +109,7 @@ func LoginUserController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, response.BaseResponse{
 		Code:    http.StatusOK,
-		Message: "Berhasil login",
+		Message: "Hi,Welcome back",
 		Data:    userResponse,
 	})
 

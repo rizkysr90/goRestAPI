@@ -2,9 +2,9 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"project/config"
+	"project/helper"
 	"project/middlewares"
 	admins "project/model/admin"
 	"project/model/loan"
@@ -21,8 +21,24 @@ func RegisterAdminController(c echo.Context) error {
 	c.Bind(&adminRegister)
 
 	if adminRegister.Name == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "Nama tidak boleh kosong!",
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Bad Request - Nama wajib diisi saat pendaftaran",
+			Data:    nil,
+		})
+	}
+	if adminRegister.Email == "" {
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Bad Request - Email wajib diisi saat pendaftaran",
+			Data:    nil,
+		})
+	}
+	if adminRegister.Password == "" {
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Bad Request - Password wajib diisi saat pendaftaran",
+			Data:    nil,
 		})
 	}
 
@@ -30,18 +46,20 @@ func RegisterAdminController(c echo.Context) error {
 	AdminDB.Name = adminRegister.Name
 	AdminDB.Email = adminRegister.Email
 	AdminDB.Address = adminRegister.Address
-	AdminDB.Password = adminRegister.Address
+	AdminDB.Password, _ = helper.Hash(adminRegister.Password)
 
 	result := config.DB.Create(&AdminDB)
 	if result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "Failed to create the data",
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Bad Request - Email sudah digunakan",
+			Data:    nil,
 		})
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "succes create user",
-		"id":      AdminDB.Id,
-		"name":    AdminDB.Name,
+	return c.JSON(http.StatusOK, response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "OK - Akun admin berhasil dibuat",
+		Data:    nil,
 	})
 }
 
@@ -51,13 +69,12 @@ func LoginAdminController(c echo.Context) error {
 
 	admin := admins.Admin{}
 
-	result := config.DB.First(&admin, "email = ? AND password = ?", adminLogin.Email, adminLogin.Password)
-
+	result := config.DB.First(&admin, "email = ?", adminLogin.Email)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return c.JSON(http.StatusForbidden, response.BaseResponse{
 				Code:    http.StatusForbidden,
-				Message: "User tidak ditemukan atau password tidak sesuai",
+				Message: "Periksa email anda kembali",
 				Data:    nil,
 			})
 		} else {
@@ -68,6 +85,13 @@ func LoginAdminController(c echo.Context) error {
 			})
 		}
 	}
+	if !helper.CheckPasswordHash(adminLogin.Password, admin.Password) {
+		return c.JSON(http.StatusForbidden, response.BaseResponse{
+			Code:    http.StatusForbidden,
+			Message: "Password salah",
+			Data:    nil,
+		})
+	}
 	token, err := middlewares.GenerateTokenJWTAdmin(admin.Id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
@@ -76,6 +100,7 @@ func LoginAdminController(c echo.Context) error {
 			Data:    nil,
 		})
 	}
+
 	adminResponse := admins.AdminResponse{
 		Id:        admin.Id,
 		Name:      admin.Name,
@@ -94,46 +119,53 @@ func LoginAdminController(c echo.Context) error {
 
 }
 
-// func GetReservation(c echo.Context) error {
-
-// }
 func ReservationProcces(c echo.Context) error {
 
-	getJSON := loan.ProccesReservation{}
-	c.Bind(&getJSON)
-	reservation := loan.Loan{}
-	result := config.DB.First(&reservation, "id = ?", getJSON.Id)
+	proccesReservation := loan.ProccesReservation{}
+	c.Bind(&proccesReservation)
+	loan := loan.Loan{}
+	result := config.DB.First(&loan, "id = ?", proccesReservation.Id)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return c.JSON(http.StatusForbidden, response.BaseResponse{
 				Code:    http.StatusForbidden,
-				Message: "Reservation tidak ditemukan",
+				Message: "Reservation Id tidak ditemukan",
 				Data:    nil,
 			})
 		} else {
 			return c.JSON(http.StatusInternalServerError, response.BaseResponse{
 				Code:    http.StatusInternalServerError,
-				Message: "Ada keselahan di server",
+				Message: "Internal Server Error",
 				Data:    nil,
 			})
 		}
 	}
 	layout := "2006-01-02" //TEMPLATE PARSE STRING TO DATE
-	reservation.Status = getJSON.Status
-	date, err := time.Parse(layout, getJSON.LoanDate)
+	loan.CodeID = proccesReservation.Status
+	date, err := time.Parse(layout, proccesReservation.LoanDate)
 
 	if err != nil {
-		fmt.Println(err)
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Internal Server Error",
+			Data:    nil,
+		})
 	}
 
-	reservation.LoanDate = date
-	config.DB.Save(&reservation)
-
+	loan.LoanDate = date
+	res := config.DB.Save(&loan)
+	if res.Error != nil {
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Internal Server Error",
+			Data:    nil,
+		})
+	}
 	return c.JSON(http.StatusOK, response.BaseResponse{
 		Code:    http.StatusOK,
 		Message: "Pesanan dikonfirmasi",
-		Data:    nil,
+		Data:    loan,
 	})
 
 }

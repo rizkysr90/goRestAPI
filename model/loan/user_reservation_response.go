@@ -1,14 +1,15 @@
 package loan
 
 import (
-	books "project/model/Books"
+	books "project/model/books"
+	"project/model/status"
 )
 
 type ReservationResponse struct {
-	Id          int                     `json:"id"`
-	StatusOrder int                     `json:"status_order"`
-	User        UserReservationResponse `json:"users"`
-	Book        books.Book              `json:"book"`
+	Id   int                     `json:"id"`
+	Code status.Code             `json:"code"`
+	User UserReservationResponse `json:"users"`
+	Book books.Book              `json:"book"`
 }
 
 type UserReservationResponse struct {
