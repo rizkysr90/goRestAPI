@@ -5,10 +5,7 @@ import (
 	"net/http"
 	"project/config"
 	"project/model/books"
-	"project/model/loan"
 	"project/model/response"
-	"project/model/status"
-	"project/model/users"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -96,71 +93,6 @@ func SearchBookByTitle(c echo.Context) error {
 		Code:    http.StatusOK,
 		Message: "Data buku ditemukan",
 		Data:    book,
-	})
-
-}
-func LoanBook(c echo.Context) error {
-	var reservation loan.UserReservation
-	var data loan.Loan
-	var book books.Book
-	var user users.User
-	var code status.Code
-	c.Bind(&reservation)
-	err := config.DB.Where("id = ?", reservation.BookId).Find(&book).Error
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, response.BaseResponse{
-			Code:    http.StatusBadRequest,
-			Message: "Bad Request - Buku tidak tersedia",
-			Data:    nil,
-		})
-	}
-	data.BookID = reservation.BookId
-	// // err = config.DB.Where("id = ?", reservation.UserId).Find(&user).Error
-	// // if err != nil {
-	// // 	return c.JSON(http.StatusBadRequest, response.BaseResponse{
-	// // 		Code:    http.StatusBadRequest,
-	// // 		Message: "Bad Request - Akun belum terdaftar",
-	// // 		Data:    nil,
-	// // 	})
-	// // }
-	data.UserID = reservation.UserId
-	data.CodeID = 1
-	// err = config.DB.Where("id = ?", data.CodeID).Find(&status).Error
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, response.BaseResponse{
-	// 		Code:    http.StatusInternalServerError,
-	// 		Message: "Internal Server Error",
-	// 		Data:    nil,
-	// 	})
-	// }
-
-	result := config.DB.Create(&data)
-	if result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "Failed to reserve book",
-		})
-	}
-	config.DB.Save(&data)
-	config.DB.Preload("Book").Find(&book)
-	config.DB.Preload("User").Find(&user)
-	config.DB.Preload("Code").Find(&code)
-	// config.DB.Joins("JOIN books ON books.id = loans.book_id").Joins("JOIN users ON users.id = loans.user_id").Find(&data)
-	UserResponse := loan.UserReservationResponse{
-		Id:    user.Id,
-		Name:  user.Name,
-		Email: user.Email,
-	}
-	resp := loan.ReservationResponse{
-		Id:   data.Id,
-		Code: code,
-		User: UserResponse,
-		Book: book,
-	}
-
-	return c.JSON(http.StatusOK, response.BaseResponse{
-		Code:    http.StatusOK,
-		Message: "OK - Pemesanan berhasil",
-		Data:    resp,
 	})
 
 }

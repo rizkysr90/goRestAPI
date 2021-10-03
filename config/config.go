@@ -29,5 +29,5 @@ func InitMigrate() {
 	DB.AutoMigrate(&books.Book{})
 	DB.AutoMigrate(&loan.Loan{})
 	DB.AutoMigrate(&admins.Admin{})
-	DB.AutoMigrate(&status.Code{})
+	DB.AutoMigrate(&status.Status{})
 }

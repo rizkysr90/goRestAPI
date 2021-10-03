@@ -6,10 +6,10 @@ import (
 )
 
 type ReservationResponse struct {
-	Id   int                     `json:"id"`
-	Code status.Code             `json:"code"`
-	User UserReservationResponse `json:"users"`
-	Book books.Book              `json:"book"`
+	Id     int                     `json:"id"`
+	Status status.Status           `json:"status"`
+	User   UserReservationResponse `json:"users"`
+	Book   books.Book              `json:"book"`
 }
 
 type UserReservationResponse struct {

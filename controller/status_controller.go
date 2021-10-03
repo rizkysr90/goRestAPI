@@ -10,7 +10,7 @@ import (
 )
 
 func AddStatusReservationCode(c echo.Context) error {
-	var status status.Code
+	var status status.Status
 	c.Bind(&status)
 
 	make := config.DB.Create(&status)

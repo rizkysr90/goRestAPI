@@ -25,6 +25,7 @@ func New() *echo.Echo {
 	e.PUT("/admin/reservation", controller.ReservationProcces, jwtAdmin)
 	m.LogMiddleware(e)
 
-	e.POST("/reservation", controller.LoanBook, jwtUser)
+	e.POST("/reservation", controller.ReservationBook, jwtUser)
+	e.GET("/reservation", controller.GetReservationById)
 	return e
 }

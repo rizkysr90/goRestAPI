@@ -7,9 +7,7 @@ import (
 	"project/helper"
 	"project/middlewares"
 	admins "project/model/admin"
-	"project/model/loan"
 	"project/model/response"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -115,57 +113,6 @@ func LoginAdminController(c echo.Context) error {
 		Code:    http.StatusOK,
 		Message: "Berhasil login",
 		Data:    adminResponse,
-	})
-
-}
-
-func ReservationProcces(c echo.Context) error {
-
-	proccesReservation := loan.ProccesReservation{}
-	c.Bind(&proccesReservation)
-	loan := loan.Loan{}
-	result := config.DB.First(&loan, "id = ?", proccesReservation.Id)
-
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return c.JSON(http.StatusForbidden, response.BaseResponse{
-				Code:    http.StatusForbidden,
-				Message: "Reservation Id tidak ditemukan",
-				Data:    nil,
-			})
-		} else {
-			return c.JSON(http.StatusInternalServerError, response.BaseResponse{
-				Code:    http.StatusInternalServerError,
-				Message: "Internal Server Error",
-				Data:    nil,
-			})
-		}
-	}
-	layout := "2006-01-02" //TEMPLATE PARSE STRING TO DATE
-	loan.CodeID = proccesReservation.Status
-	date, err := time.Parse(layout, proccesReservation.LoanDate)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Internal Server Error",
-			Data:    nil,
-		})
-	}
-
-	loan.LoanDate = date
-	res := config.DB.Save(&loan)
-	if res.Error != nil {
-		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Internal Server Error",
-			Data:    nil,
-		})
-	}
-	return c.JSON(http.StatusOK, response.BaseResponse{
-		Code:    http.StatusOK,
-		Message: "Pesanan dikonfirmasi",
-		Data:    loan,
 	})
 
 }
