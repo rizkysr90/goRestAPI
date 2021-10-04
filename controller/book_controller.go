@@ -15,6 +15,13 @@ func AddBookController(c echo.Context) error {
 	//make request from google book api
 	var call books.Calling
 	c.Bind(&call)
+	if call.VolumeUnique == "" {
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Required parameter",
+			Data:    nil,
+		})
+	}
 	apiKey := "?key=" + "AIzaSyBkKjJlE2J3DvjifdHTWXr4JSLS6SRlcic"
 	request := "https://www.googleapis.com/books/v1/volumes/" + call.VolumeUnique + apiKey
 	req, err := http.NewRequest("GET", request, nil)
@@ -47,7 +54,13 @@ func AddBookController(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-
+	if data.VolumeInfo.Title == "" {
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Oops,Something wrong",
+			Data:    nil,
+		})
+	}
 	var book books.Book
 	book.Authors = strings.Join(data.VolumeInfo.Authors, ",")
 	book.Title = data.VolumeInfo.Title
@@ -79,19 +92,22 @@ func SearchBookByTitle(c echo.Context) error {
 	var book books.Book
 	err := config.DB.Where("title LIKE ?", target).Find(&book).Error
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "Error while search data",
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Status Internal Server Error",
+			Data:    nil,
 		})
 	}
 	if book.Title == "" {
-		return c.JSON(http.StatusAccepted, map[string]interface{}{
-			"message": "Data buku tidak ditemukan",
+		return c.JSON(http.StatusForbidden, response.BaseResponse{
+			Code:    http.StatusForbidden,
+			Message: "Data Buku Tidak Ditemukan",
+			Data:    nil,
 		})
 	}
-
 	return c.JSON(http.StatusOK, response.BaseResponse{
 		Code:    http.StatusOK,
-		Message: "Data buku ditemukan",
+		Message: "OK",
 		Data:    book,
 	})
 
