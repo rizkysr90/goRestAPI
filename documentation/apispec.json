@@ -14,13 +14,13 @@
     "url" : "http://localhost:8000"
   }],
   "paths" : {
-    "/register" : {
+    "/user/register" : {
       "post" : {
-        "summary" : "Create new Members",
-        "description" : "Create new members",
+        "summary" : "Create new user",
+        "description" : "Create new user with name,email and password required",
         "requestBody" : {
           "content" : {
-            "application/x-www-form-urlencoded:" : {
+            "application/JSON:" : {
               "schema" : {
                 "type" : "object",
                 "properties" : {
@@ -36,6 +36,12 @@
                   "address" : {
                     "type" : "string"
                   }
+                },
+                "example": {
+                  "name" : "Rizki Susilo Ramadhan",
+                  "email" : "rizkysusilo@gmail.com",
+                  "password": "rahasia123",
+                  "address":"Bekasi"
                 }
               }
             }
@@ -43,11 +49,27 @@
         },
         "responses" : {
           "200" : {
-            "description" : "Success Create New Member",
+            "description" : "OK",
             "content" : {
-              "text/plain" : {
+              "JSON" : {
                 "schema" : {
-                  "type" : "string"
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type" : "string"
+                    },
+                    "data" : {
+                      "type" : "object"
+                    }
+                  },
+                  "example": {
+                    "code": 200,
+                    "message":"OK",
+                    "data": {}
+                  }
                 }
               }
             }
@@ -56,34 +78,39 @@
         
       }
     },
-    "/login" : {
-      "post" : {
+    "/user/login" : {
+      "get" : {
         "summary" : "Login account",
-        "description" : "Login account",
-        "requestBody" : {
-          "content" : {
-              "application/x-www-form-urlencoded:" : {
-                "schema" : {
-                  "type" : "object",
-                  "properties" : {
-                    "email" : {
-                      "type" : "string"
-                    },
-                    "password" : {
-                      "type" : "string"
-                    }
-                  }
-                }
-              }
-          }
-        },
+        "description" : "Login account by using email and password",
         "responses" : {
           "200" : {
             "description" : "Success Login",
             "content" : {
-              "text/plain" : {
+              "JSON" : {
                 "schema" : {
-                  "type" : "string"
+                  "type" : "object",
+                  "properties" : {
+                    "code":{
+                      "type" : "integer"
+                    },
+                    "message":{
+                      "type" : "string"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  },
+                  "example":{
+                    "code":200,
+                    "message":"Hi,Welcome back",
+                    "data": {
+                      "id": 1,
+                      "name": "Rizki Susilo Ramadhan",
+                      "email":"rizkysusilo@gmail.com",
+                      "address":"Bekasi",
+                      "token" : "JWTtoken"
+                    }
+                  }
                 }
               }
             }
@@ -91,93 +118,363 @@
         }
       }
     },
-    "/member" :  {
-      "get" : {
-        "summary" : "Get member information",
-        "description" : "Get user name member",
+    "/admin/register" : {
+      "post" : {
+        "summary" : "Create new admin",
+        "description" : "Create new admin with name,email and password required",
+        "requestBody" : {
+          "content" : {
+            "application/JSON:" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "email" : {
+                    "type" : "string"
+                  },
+                  "password" : {
+                    "type" : "string"
+                  },
+                  "address" : {
+                    "type" : "string"
+                  }
+                },
+                "example": {
+                  "name" : "Syaiful Bahri",
+                  "email" : "syaiful@gmail.com",
+                  "password": "rahasia123",
+                  "address":"Bekasi"
+                }
+              }
+            }
+          }
+        },
         "responses" : {
           "200" : {
-            "description" : "succes get member name",
+            "description" : "OK",
             "content" : {
-                "application/json" : {
-                  "schema" : {
-                    "type" : "object",
-                    "properties": {
-                      "name" : {
-                        "type" : "string",
-                        "description" : "Member name"
-                      }
+              "JSON" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type" : "string"
+                    },
+                    "data" : {
+                      "type" : "object"
+                    }
+                  },
+                  "example": {
+                    "code": 200,
+                    "message":"OK",
+                    "data": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+      }
+    },
+    "/admin/login" : {
+      "get" : {
+        "summary" : "Admin login account",
+        "description" : "Admin Login account by using email and password",
+        "responses" : {
+          "200" : {
+            "description" : "Success Login",
+            "content" : {
+              "JSON" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code":{
+                      "type" : "integer"
+                    },
+                    "message":{
+                      "type" : "string"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  },
+                  "example":{
+                    "code":200,
+                    "message":"Berhasil login",
+                    "data": {
+                      "id": 1,
+                      "name": "Syaiful Bahri",
+                      "email":"syaiful@gmail.com",
+                      "address":"Bekasi",
+                      "token" : "JWTtoken"
                     }
                   }
-                }   
+                }
+              }
             }
-           
           }
         }
       }
     },
-    "/member/books" : {
-      "get" : {
-        "summary" : "Search books information",
-        "description" : "get books information",
-        "parameters" : [
-          {
-              "in" : "query",
-              "name" : "name",
+     "/reservation" : {
+      "post" : {
+        "summary" : "Make a new reservation for a book",
+        "description" : "Make a new reservation for a book ",
+        "requestBody" : {
+          "content" : {
+            "application/JSON:" : {
               "schema" : {
-                "type" : "string"
-              },
-              "description" : "The name of books"
-          },
-          {
-            "in" : "query",
-            "name" : "author",
-            "schema" : {
-              "type" : "string"
-            },
-            "description" : "the author of books"
-          },
-          {
-            "in" : "query",
-            "name" : "year",
-            "schema" : {
-              "type" : "integer"
-            },
-            "description" : "the years of books released"
+                "type" : "object",
+                "properties" : {
+                  "user_id" : {
+                    "type" : "integer"
+                  },
+                  "book_id" : {
+                    "type" : "integer"
+                  }
+                },
+                "example": {
+                  "user_id" : 1,
+                  "book_id":7
+                }
+              }
+            }
           }
-          
-        ],
+        },
         "responses" : {
           "200" : {
-            "description" : "succes get books",
+            "description" : "OK",
             "content" : {
-                "application/json" : {
-                  "schema" : {
-                    "type" : "object",
-                    "properties": {
-                      "name" : {
-                        "type" : "string",
-                        "description" : "Book name"
+              "JSON" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type" : "string"
+                    },
+                    "data" : {
+                      "type" : "object"
+                    }
+                  },
+                  "example": {
+                    "code": 200,
+                    "message":"Succes Retrieve Data",
+                    "data": {
+                      "id" : 1,
+                      "status": {
+                        "id": 1,
+                        "message":"Menunggu konfirmasi admin"
                       },
-                      "author" : {
-                        "type" : "string",
-                        "description" : "author of the book"
+                      "user":{
+                        "id": 1,
+                        "name" : "Rizki Susilo Ramadhan",
+                        "email" :"rizkysusilo@gmail.com"
                       },
-                      "year" : {
-                        "type" : "integer",
-                        "description" : "year of released book"
-                      },
-                      "stock" : {
-                        "type" : "integer",
-                        "description" : "stock of copied book"
+                      "book": {
+                        "id":7,
+                        "title": "Atomic Habbits",
+                        "authors":"James Clear",
+                        "categories": "self improvement",
+                        "publishedDate":"2019-09-16",
+                        "cover":"http://books.google.com/books/publisher/content?id=1bm0DwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&imgtk=AFLRE70ahpSqohOZAmEyq5WMrUiapWX6usc9q_XvClLjjyHUbRaQU-QSUabM1VGn5KFlNnzGYV-3mh1nmrOPc1Zo_bbU_f4pFI7gc08oWGojpVmykOqCjQfAHBu-o1Ws2Io20Pm7-ZTK&source=gbs_api",
+                        "copiesOwned":10
                       }
                     }
                   }
-                }   
+                }
+              }
             }
-           
           }
         }
+        
+      }
+    },
+     "/admin/reservation" : {
+      "put" : {
+        "summary" : "Accept a reservation book that was made by user",
+        "description" : "Accept a reservation book that was made by user by id reservation",
+        "requestBody" : {
+          "content" : {
+            "application/JSON:" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "id" : {
+                    "type" : "integer"
+                  },
+                  "status" : {
+                    "type" : "integer"
+                  },
+                  "loan_date": {
+                    "type" : "string"
+                  }
+                },
+                "example": {
+                  "id" : 1,
+                  "status":2,
+                  "loan_date":"2021-10-08"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "JSON" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type" : "string"
+                    },
+                    "data" : {
+                      "type" : "object"
+                    }
+                  },
+                  "example": {
+                    "code": 200,
+                    "message":"Pesanan dikonfirmasi",
+                    "data": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+      }
+    },
+    "/reservation/" : {
+      "get" : {
+        "summary" : "get user reservation info by id reservation",
+        "description" : "get reservation info by id reservation",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "JSON" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type" : "string"
+                    },
+                    "data" : {
+                      "type" : "object"
+                    }
+                  },
+                  "example": {
+                    "code": 200,
+                    "message":"Succes Retrieve Data",
+                    "data": {
+                      "id" : 1,
+                      "status": {
+                        "id": 2,
+                        "message":"Pesanan terkonfirmasi"
+                      },
+                      "user":{
+                        "id": 1,
+                        "name" : "Rizki Susilo Ramadhan",
+                        "email" :"rizkysusilo@gmail.com"
+                      },
+                      "book": {
+                        "id":7,
+                        "title": "Atomic Habbits",
+                        "authors":"James Clear",
+                        "categories": "self improvement",
+                        "publishedDate":"2019-09-16",
+                        "cover":"http://books.google.com/books/publisher/content?id=1bm0DwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&imgtk=AFLRE70ahpSqohOZAmEyq5WMrUiapWX6usc9q_XvClLjjyHUbRaQU-QSUabM1VGn5KFlNnzGYV-3mh1nmrOPc1Zo_bbU_f4pFI7gc08oWGojpVmykOqCjQfAHBu-o1Ws2Io20Pm7-ZTK&source=gbs_api",
+                        "copiesOwned":10
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+      }
+    },
+     "/search" : {
+      "get" : {
+        "summary" : "Search book by title",
+        "description" : "User can search book by title",
+        "parameters":[
+          {
+           "name": "title",
+            "in": "query",
+            "required": false,
+            "description": "book title you want to find",
+            "schema": {
+              "type": "string",
+              "nullable": true,
+              "default": false
+            },
+            "examples": {
+              "title": {
+                "description": "book title",
+                "value": "Atomic Habbits"
+              }
+            }
+          }
+            
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "JSON" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type" : "string"
+                    },
+                    "data" : {
+                      "type" : "object"
+                    }
+                  },
+                  "example": {
+                    "code": 200,
+                    "message":"OK",
+                    "data": {
+                      "id":7,
+                        "title": "Atomic Habbits",
+                        "authors":"James Clear",
+                        "categories": "self improvement",
+                        "publishedDate":"2019-09-16",
+                        "cover":"http://books.google.com/books/publisher/content?id=1bm0DwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&imgtk=AFLRE70ahpSqohOZAmEyq5WMrUiapWX6usc9q_XvClLjjyHUbRaQU-QSUabM1VGn5KFlNnzGYV-3mh1nmrOPc1Zo_bbU_f4pFI7gc08oWGojpVmykOqCjQfAHBu-o1Ws2Io20Pm7-ZTK&source=gbs_api",
+                        "copiesOwned":10
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        
       }
     }
   }
