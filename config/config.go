@@ -23,6 +23,16 @@ func InitDB() {
 	}
 	InitMigrate()
 }
+func InitDBTest() {
+	dsn := "root:adarizki123@tcp(127.0.0.1:3306)/library_test?charset=utf8mb4&parseTime=True&loc=Local"
+	var err error
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	if err != nil {
+		panic(err.Error())
+	}
+	InitMigrateTest()
+}
 
 func InitMigrate() {
 	DB.AutoMigrate(&users.User{})
@@ -30,4 +40,12 @@ func InitMigrate() {
 	DB.AutoMigrate(&loan.Loan{})
 	DB.AutoMigrate(&admins.Admin{})
 	DB.AutoMigrate(&status.Status{})
+}
+func InitMigrateTest() {
+	DB.Migrator().DropTable(&users.User{})
+	DB.AutoMigrate(&users.User{})
+	DB.Migrator().DropTable(&admins.Admin{})
+	DB.AutoMigrate(&admins.Admin{})
+	DB.Migrator().DropTable(&books.Book{})
+	DB.AutoMigrate(&books.Book{})
 }

@@ -49,14 +49,14 @@ func RegisterUserController(c echo.Context) error {
 	result := config.DB.Create(&UserDB)
 	if result.Error != nil {
 		return c.JSON(http.StatusBadRequest, response.BaseResponse{
-			Code:    http.StatusInternalServerError,
+			Code:    http.StatusBadRequest,
 			Message: "Bad Request - Email sudah digunakan",
 			Data:    nil,
 		})
 	}
 	return c.JSON(http.StatusOK, response.BaseResponse{
 		Code:    http.StatusOK,
-		Message: "OK- Akun Berhasil daftar",
+		Message: "OK",
 		Data:    nil,
 	})
 
