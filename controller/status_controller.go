@@ -17,14 +17,14 @@ func AddStatusReservationCode(c echo.Context) error {
 
 	if make.Error != nil {
 		return c.JSON(http.StatusBadRequest, response.BaseResponse{
-			Code:    http.StatusInternalServerError,
+			Code:    http.StatusBadRequest,
 			Message: "Bad Request - Code sudah digunakan",
 			Data:    nil,
 		})
 	}
 	return c.JSON(http.StatusOK, response.BaseResponse{
 		Code:    http.StatusOK,
-		Message: "OK- Code berhasil dibuat",
+		Message: "OK",
 		Data:    nil,
 	})
 

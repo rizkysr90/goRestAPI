@@ -48,4 +48,6 @@ func InitMigrateTest() {
 	DB.AutoMigrate(&admins.Admin{})
 	DB.Migrator().DropTable(&books.Book{})
 	DB.AutoMigrate(&books.Book{})
+	DB.Migrator().DropTable(&status.Status{})
+	DB.AutoMigrate(&status.Status{})
 }

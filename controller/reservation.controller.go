@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ReservationBook(c echo.Context) error {
+func ReservationBookController(c echo.Context) error {
 	var reservation loan.UserReservation
 	var data loan.Loan
 	var book books.Book
