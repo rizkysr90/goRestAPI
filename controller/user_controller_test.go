@@ -180,12 +180,12 @@ func TestLoginUserControllerFailedByEmail(t *testing.T) {
 	c := e.NewContext(request, recorder)
 	if assert.NoError(t, LoginUserController(c)) {
 		response := recorder.Result()
-		assert.Equal(t, 403, response.StatusCode)
+		assert.Equal(t, 400, response.StatusCode)
 		body, _ := io.ReadAll(response.Body)
 		var responseBody map[string]interface{}
 		json.Unmarshal(body, &responseBody)
 
-		assert.Equal(t, 403, int(responseBody["code"].(float64)))
+		assert.Equal(t, 400, int(responseBody["code"].(float64)))
 		assert.Equal(t, "Email belum terdaftar", responseBody["message"])
 	}
 }
@@ -200,12 +200,12 @@ func TestLoginUserControllerFailedByPassword(t *testing.T) {
 	c := e.NewContext(request, recorder)
 	if assert.NoError(t, LoginUserController(c)) {
 		response := recorder.Result()
-		assert.Equal(t, 403, response.StatusCode)
+		assert.Equal(t, 400, response.StatusCode)
 		body, _ := io.ReadAll(response.Body)
 		var responseBody map[string]interface{}
 		json.Unmarshal(body, &responseBody)
 
-		assert.Equal(t, 403, int(responseBody["code"].(float64)))
+		assert.Equal(t, 400, int(responseBody["code"].(float64)))
 		assert.Equal(t, "Email belum terdaftar", responseBody["message"])
 	}
 }

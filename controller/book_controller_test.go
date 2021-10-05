@@ -94,12 +94,12 @@ func TestAddBookControllerFailByVolumeId(t *testing.T) {
 	c := e.NewContext(request, recorder)
 	if assert.NoError(t, AddBookController(c)) {
 		response := recorder.Result()
-		assert.Equal(t, 500, response.StatusCode)
+		assert.Equal(t, 204, response.StatusCode)
 		body, _ := io.ReadAll(response.Body)
 		var responseBody map[string]interface{}
 		json.Unmarshal(body, &responseBody)
 
-		assert.Equal(t, 500, int(responseBody["code"].(float64)))
+		assert.Equal(t, 204, int(responseBody["code"].(float64)))
 		assert.Equal(t, "Oops,Something wrong", responseBody["message"])
 	}
 }
@@ -132,12 +132,12 @@ func TestSearchBookByTitleFailed(t *testing.T) {
 	c := e.NewContext(request, recorder)
 	if assert.NoError(t, SearchBookByTitle(c)) {
 		response := recorder.Result()
-		assert.Equal(t, 403, response.StatusCode)
+		assert.Equal(t, 204, response.StatusCode)
 		body, _ := io.ReadAll(response.Body)
 		var responseBody map[string]interface{}
 		json.Unmarshal(body, &responseBody)
 
-		assert.Equal(t, 403, int(responseBody["code"].(float64)))
+		assert.Equal(t, 204, int(responseBody["code"].(float64)))
 		assert.Equal(t, "Data Buku Tidak Ditemukan", responseBody["message"])
 	}
 }

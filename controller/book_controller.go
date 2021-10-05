@@ -55,8 +55,8 @@ func AddBookController(c echo.Context) error {
 		})
 	}
 	if data.VolumeInfo.Title == "" {
-		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
-			Code:    http.StatusInternalServerError,
+		return c.JSON(http.StatusNoContent, response.BaseResponse{
+			Code:    http.StatusNoContent,
 			Message: "Oops,Something wrong",
 			Data:    nil,
 		})
@@ -99,8 +99,8 @@ func SearchBookByTitle(c echo.Context) error {
 		})
 	}
 	if book.Title == "" {
-		return c.JSON(http.StatusForbidden, response.BaseResponse{
-			Code:    http.StatusForbidden,
+		return c.JSON(http.StatusNoContent, response.BaseResponse{
+			Code:    http.StatusNoContent,
 			Message: "Data Buku Tidak Ditemukan",
 			Data:    nil,
 		})
