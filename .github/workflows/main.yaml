@@ -35,3 +35,28 @@ jobs:
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
     - name: push image to registry docker hub
       run: docker push rizkysr90/book_library:1.0.0
+  
+  deployment-ec2:
+    name: "Deploy to ec2 from registry docker hub"
+    runs-on: ubuntu-latest
+    needs: build-push-docker
+    steps:
+      - uses: actions/checkout@v2 
+      - name: configuration SSH
+        env:
+          SSH_USER: ${{ secrets.SSH_USERNAME }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/book_library.pem
+          chmod 400 ~/.ssh/book_library.pem
+          cat >>~/.ssh/config <<END
+          Host development
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/book_library.pem
+            StrictHostKeyChecking=no
+          END
+      - name: Connect EC2 & Remove All Container & Pull from Registry & Start
+        run: ssh development 'docker rm -f $(docker ps -a -q) && docker pull rizkysr90/book_library:1.0.0 && docker run -d -p 8080:8080 --name api_book_library rizkysr90/book_library:1.0.0'
