@@ -1,8 +1,8 @@
 package config
 
 import (
+	books "project/model/Books"
 	admins "project/model/admin"
-	"project/model/books"
 	"project/model/loan"
 	"project/model/status"
 	"project/model/users"

@@ -1,7 +1,7 @@
 package loan
 
 import (
-	books "project/model/books"
+	books "project/model/Books"
 	"project/model/status"
 	"project/model/users"
 	"time"

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"project/config"
-	"project/model/books"
+	books "project/model/Books"
 	"project/model/loan"
 	"project/model/response"
 	"project/model/status"
