@@ -70,22 +70,22 @@ func LoginAdminController(c echo.Context) error {
 	result := config.DB.First(&admin, "email = ?", adminLogin.Email)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return c.JSON(http.StatusForbidden, response.BaseResponse{
-				Code:    http.StatusForbidden,
+			return c.JSON(http.StatusBadRequest, response.BaseResponse{
+				Code:    http.StatusBadRequest,
 				Message: "Periksa email anda kembali",
 				Data:    nil,
 			})
 		} else {
-			return c.JSON(http.StatusInternalServerError, response.BaseResponse{
-				Code:    http.StatusInternalServerError,
+			return c.JSON(http.StatusBadRequest, response.BaseResponse{
+				Code:    http.StatusBadRequest,
 				Message: "Ada keselahan di server",
 				Data:    nil,
 			})
 		}
 	}
 	if !helper.CheckPasswordHash(adminLogin.Password, admin.Password) {
-		return c.JSON(http.StatusForbidden, response.BaseResponse{
-			Code:    http.StatusForbidden,
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusBadRequest,
 			Message: "Password salah",
 			Data:    nil,
 		})

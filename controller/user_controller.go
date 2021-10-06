@@ -70,8 +70,8 @@ func LoginUserController(c echo.Context) error {
 	result := config.DB.First(&user, "email = ?", userLogin.Email)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return c.JSON(http.StatusForbidden, response.BaseResponse{
-				Code:    http.StatusForbidden,
+			return c.JSON(http.StatusBadRequest, response.BaseResponse{
+				Code:    http.StatusBadRequest,
 				Message: "Email belum terdaftar",
 				Data:    nil,
 			})
@@ -84,8 +84,8 @@ func LoginUserController(c echo.Context) error {
 		}
 	}
 	if !helper.CheckPasswordHash(userLogin.Password, user.Password) {
-		return c.JSON(http.StatusForbidden, response.BaseResponse{
-			Code:    http.StatusForbidden,
+		return c.JSON(http.StatusBadRequest, response.BaseResponse{
+			Code:    http.StatusBadRequest,
 			Message: "Password tidak sesuai",
 			Data:    nil,
 		})

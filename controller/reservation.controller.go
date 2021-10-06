@@ -24,9 +24,9 @@ func ReservationBookController(c echo.Context) error {
 	c.Bind(&reservation)
 	err := config.DB.Where("id = ?", reservation.BookId).Find(&book).Error
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, response.BaseResponse{
-			Code:    http.StatusBadRequest,
-			Message: "Bad Request - Buku tidak tersedia",
+		return c.JSON(http.StatusNoContent, response.BaseResponse{
+			Code:    http.StatusNoContent,
+			Message: "Buku tidak tersedia",
 			Data:    nil,
 		})
 	}
@@ -37,8 +37,10 @@ func ReservationBookController(c echo.Context) error {
 
 	result := config.DB.Create(&data)
 	if result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "Failed to reserve book",
+		return c.JSON(http.StatusInternalServerError, response.BaseResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Status internal server error",
+			Data:    nil,
 		})
 	}
 	config.DB.Save(&data)
@@ -73,8 +75,8 @@ func ReservationProcces(c echo.Context) error {
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return c.JSON(http.StatusForbidden, response.BaseResponse{
-				Code:    http.StatusForbidden,
+			return c.JSON(http.StatusNoContent, response.BaseResponse{
+				Code:    http.StatusNoContent,
 				Message: "Reservation Id tidak ditemukan",
 				Data:    nil,
 			})
@@ -122,9 +124,9 @@ func GetReservationById(c echo.Context) error {
 	c.Bind(&data)
 	err := config.DB.Where("id = ?", data.Id).Find(&data).Error
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, response.BaseResponse{
-			Code:    http.StatusBadRequest,
-			Message: "Bad Request - Buku tidak tersedia",
+		return c.JSON(http.StatusNoContent, response.BaseResponse{
+			Code:    http.StatusNoContent,
+			Message: "Reservation Id belum tersedia",
 			Data:    nil,
 		})
 	}
