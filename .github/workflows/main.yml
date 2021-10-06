@@ -1,4 +1,4 @@
-name: Running Unit Test, Build Docker Image,  Push To Docker Hub and Deploy To EC2
+name: Running Unit Test
 on:
   pull_request:
     branches:
