@@ -19,4 +19,4 @@ jobs:
       with:
         go-version: 1.16
     - name: running unit test
-      run: go test ./.../controller -cover
+      run: go test ./../../controller -cover
