@@ -2,7 +2,7 @@ package config
 
 import (
 	admins "project/model/admin"
-	books "project/model/books"
+	"project/model/books"
 	"project/model/loan"
 	"project/model/status"
 	"project/model/users"
