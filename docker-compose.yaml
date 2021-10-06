@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+        app:
+          container_name: api_library_kampus_merdeka
+          build: .
+          ports:
+              - 8080:8080
+          restart: on-failure
+          volumes:
+              - api:/usr/src/app/
+          depends_on:
+              - db_kampus_merdeka
+          networks:
+              - kampus_merdeka
+
+        db:
+          image: mysql:8.0
+          command: --default-authentication-plugin=mysql_native_password
+          container_name: db_kampus_merdeka
+          restart: always
+          environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: kampus_merdeka
+          ports:
+              - 3307:3306
+          volumes:
+              - database_mysql:/var/lib/mysql
+          networks:
+              - kampus_merdeka
+
+volumes:
+  database_mysql:
+  api:
+
+networks:
+    kampus_merdeka:
+        driver: bridge
