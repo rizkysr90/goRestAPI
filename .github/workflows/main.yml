@@ -1,4 +1,4 @@
-name : unit test golang
+name: Running Unit Test, Build Docker Image,  Push To Docker Hub and Deploy To EC2
 on:
   pull_request:
     branches:
