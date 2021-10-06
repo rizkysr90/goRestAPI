@@ -3,10 +3,10 @@ name: Running Unit Test, Build Docker Image,  Push To Docker Hub and Deploy To E
 on:
   pull_request:
     branches:
-      - 'main'
+      - 'master'
   push: 
     branches:
-      - 'main'
+      - 'master'
 
 jobs:
   unit-test:
