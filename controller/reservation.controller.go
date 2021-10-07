@@ -30,13 +30,13 @@ func ReservationBookController(c echo.Context) error {
 			Data:    nil,
 		})
 	}
-	if book.Title == "" {
-		return c.JSON(http.StatusNoContent, response.BaseResponse{
-			Code:    http.StatusNoContent,
-			Message: "Buku tidak tersedia",
-			Data:    nil,
-		})
-	}
+	// if book.Title == "" {
+	// 	return c.JSON(http.StatusNoContent, response.BaseResponse{
+	// 		Code:    http.StatusNoContent,
+	// 		Message: "Buku tidak tersedia",
+	// 		Data:    nil,
+	// 	})
+	// }
 
 	data.BookId = reservation.BookId
 	data.UserId = reservation.UserId
